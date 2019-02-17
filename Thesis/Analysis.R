@@ -30,8 +30,24 @@ tsCON <- diff(log(ts(data$consumption,
 tsINV <- diff(log(ts(data$investment,
             start = c(1980, 1), frequency = 4)), lag = 1)
 
-tsGSP <- diff(log(ts(data$`gov. spending`,
-            start = c(1980, 1), frequency = 4)), lag = 1)
+tsGSPBase <- ts(data$`gov. spending`,
+    start = c(1980, 1), frequency = 4)
+
+tsGSPS1 <- ts(data$`gov. spending`,
+    start = c(1980, 1), frequency = 4) * 1.1
+
+tsGSPS2 <- ts(data$`gov. spending`,
+    start = c(1980, 1), frequency = 4) * 1.25
+
+
+#tsGSPBase <- diff(log(ts(data$`gov. spending`,
+            #start = c(1980, 1), frequency = 4)), lag = 1)
+
+#tsGSPS1 <- diff(log(ts(data$`gov. spending`,
+            #start = c(1980, 1), frequency = 4) * 1.1), lag = 1)
+
+#tsGSPS2 <- diff(log(ts(data$`gov. spending`,
+            #start = c(1980, 1), frequency = 4) * 1.25), lag = 1)
 
 tsCPI <- ts(data$`CPI inflation`,
             start = c(1980, 1), frequency = 4)
@@ -49,11 +65,11 @@ colnames(EndoVars) <- c("GDP", "Investment", "ESR", "Consumption", "CPI") #also 
 
 
 # Also construct column vectors for alternative scenarios to attach them to the data frame
-tsGSP_Base <- window(tsGSP, end =  c(2013,2))
-GSP_Base <- as.data.frame(tsGSP_Base)
-GSP_ForeB <- as.data.frame(window(tsGSP, c(2013,3)))
-GSP_ForeS1 <- as.data.frame(window(tsGSP, c(2013,3))*1.1)
-GSP_ForeS2 <- as.data.frame(window(tsGSP, c(2013,3))*1.25)
+tsGSP_Base <- window(tsGSPBase, end = c(2013, 2))
+GSP_Base <- as.data.frame(window(tsGSP_Base, c(1980,2)))
+GSP_ForeB <- as.data.frame(window(tsGSPBase, c(2013,3)))
+GSP_ForeS1 <- as.data.frame(window(tsGSPS1, c(2013, 3)))
+GSP_ForeS2 <- as.data.frame(window(tsGSPS2, c(2013, 3)))
 
 dVar <- VAR(EndoVars, p = 3, type = "none", exogen = GSP_Base, ic = "FPE")
 
@@ -76,13 +92,19 @@ for (i in 1:length(colnames(EndoVars))) {
     acfplot(resids, name)
 }
 
-axisStart <- as.Date('2011/01/01')
+#Run Wilcoxon test to check for significant difference between scenarios and BL
+WTestS1 <- predictionsignificance(EndoVars, predBase, predictList[[1]])
+WTestS2 <- predictionsignificance(EndoVars, predBase, predictList[[2]])
+
+axisStart <- as.Date('2012/10/01')
 axisEnd <- as.Date('2015/04/01')
 predictStart <- as.Date('2013/07/01')
 
+
+
 buildBaseGraphs(EndoVars, dVar, predBase, axisStart, axisEnd, predictStart)
 
-buildScenarioGraphs(EndoVars, dVar, predBase, predictList, axisStart, axisEnd, predictStart)
+buildScenarioGraphs(EndoVars, dVar, predBase, predictList, as.Date('2013/04/01'), axisEnd, predictStart)
 #resids <- dVar[['varresult']][[varname]][['residuals']]
 #acfplot(resids, varname)
 #Prepare dataframes for plot

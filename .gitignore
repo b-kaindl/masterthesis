@@ -37,3 +37,4 @@ rsconnect/
 
 #VS Solution File
 *.sln
+.Rproj.user

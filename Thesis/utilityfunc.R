@@ -36,7 +36,7 @@ acfplot <- function(var, cmain) {
 
 #TODO: Test after refactoring
 #Takes the predictions for the variables in var
-preidctionsignificance <- function(vardata, basepred, scenariopred) {
+predictionsignificance <- function(vardata, basepred, scenariopred) {
 
 
     #Prepare Dataframe to be returned later
@@ -61,8 +61,8 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
     nrows <- nrow(vardata)
     for (i in 1:length(colnames(vardata))) {
         varname <- colnames(vardata)[i]
-
-        fname <- paste0(varname, 'BasePred.jpeg')
+        
+        fname <- paste0(varname, '_BasePred.jpeg')
 
         #startDate <- as.Date("2011/1/1")
         #endDate <- as.Date("2015/4/1")
@@ -74,10 +74,11 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
                        check.rows = TRUE)
 
         colnames(actualdf) = c('Dates', 'value')
-
+        lastNonPredDate <- max(actualdf[actualdf$Dates < predStart, 'Dates'])
 
         #startDate <- as.Date("2013/7/1")
         predDates <- seq(predStart, graphEnd, by = "quarter")
+        
 
         basefcst <- pred$fcst[[varname]][, 1]
         lower <- pred$fcst[[varname]][, 2]
@@ -104,6 +105,8 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
                            )]
         basefcstdf$id <- 'base'
         basefcstdf$type <- 'basepred'
+        basefcstdf[nrow(basefcstdf) + 1,] <-
+            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'base', 'basepred')
 
         #TODO: consider how to make forecast bands look prettier
         #TODO: also make look of graphs consistent
@@ -112,30 +115,38 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         upperdf$id <- 'upper'
         upperdf$type <- 'predband'
         colnames(upperdf) <- c('Dates', 'value', 'id', 'type')
+        upperdf[nrow(upperdf) + 1,] <-
+            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'upper', 'predband')
 
         lowerdf <- fcstdf[, c('Dates', 'lower')]
         lowerdf$id <- 'lower'
         lowerdf$type <- 'predband'
         colnames(lowerdf) <- c('Dates', 'value', 'id', 'type')
+        lowerdf[nrow(lowerdf) + 1,] <-
+            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'lower', 'predband')
 
         baseplotdf <- rbind(actualdf #[actualdf$Dates < min(basefcstdf$Dates),]
                       , basefcstdf, upperdf, lowerdf)
 
-        #Write to File
-        jpeg(fname)
-
-        baseplot <- ggplot() + geom_line(data = baseplotdf[baseplotdf$id == 'actual', c(1, 2)],
-                                   color = 'black', aes(x = Dates, y = value)) +
+        baseplot <- ggplot() + geom_line(data = baseplotdf[baseplotdf$id == 'actual', c(1, 2)], color = 'black', aes(x = Dates, y = value)) +
         geom_line(data = baseplotdf[baseplotdf$id == 'base', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dashed') +
         geom_line(data = baseplotdf[baseplotdf$id == 'upper', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
         geom_line(data = baseplotdf[baseplotdf$id == 'lower', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
-        geom_point(data = baseplotdf, aes(x = Dates, y = value, shape = type), size = 1) +
+        geom_point(data = baseplotdf, aes(x = Dates, y = value, shape = type), size = 2) +
         scale_x_date(breaks = graphDates) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw() + theme_linedraw()
+        #scale_shape_discrete('') +
+        scale_linetype_manual('', values = c('actual' = 1, 'basepred' = 2, 'predband' = 3)) + theme_bw() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) 
+        
+        
 
+        #Write to File
+        jpeg(fname, width = 639, height = 396, units = 'px', quality = 100)
+        print(baseplot)
         dev.off()
 
-        rm(baseplot)
+
     }
 }
 
@@ -146,7 +157,7 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
     for (i in 1:length(colnames(vardata))) {
         varname <- colnames(vardata)[i]
 
-        fname <- paste0(varname, 'Scenarios.jpeg')
+        fname <- paste0(varname, '_Scenarios.jpeg')
 
         graphDates <- seq(graphStart, graphEnd, by = "quarter")
         actual <- vardata[(nrows - length(graphDates) + 1):nrows,
@@ -158,10 +169,13 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
         colnames(actualdf) = c('dates', 'value', 'type')
 
         predDates <- seq(predStart, graphEnd, by = "quarter")
+        lastNonPredDate <- max(actualdf[actualdf$dates < predStart, 'dates'])
 
         basefcst <- data.frame(predDates, basePred$fcst[[varname]][, 1])
-        basefcst$type <- 'baseline'
+        basefcst$type <- 'Baseline'
         colnames(basefcst) = c('dates', 'value', 'type')
+        basefcst[nrow(basefcst) + 1,] <-
+            list(lastNonPredDate, actualdf[actualdf$dates == lastNonPredDate, 'value'], 'Baseline')
 
         #Initialize DF for scenario forecasts
         scenFcstList <- list()
@@ -169,7 +183,7 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
         for (j in 1:length(predList)) {
             #Prepare DF for scenario forecast
             fcstSeries <- data.frame(predDates, predList[[j]]$fcst[[varname]][, 1])
-            fcstSeries$type <- paste('scenario', j)
+            fcstSeries$type <- paste('Scenario', j)
             colnames(fcstSeries) = c('dates', 'value', 'type')
 
             #Store scenario forecast in list 
@@ -181,29 +195,36 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
 
         #Add scenario forecasts
         for (k in 1:length(scenFcstList)) {
+            scenFcstList[[k]][nrow(scenFcstList[[k]]) + 1,] <-
+            list(lastNonPredDate, actualdf[actualdf$dates == lastNonPredDate, 'value'], paste('Scenario', j))
             scenPlotDf <- rbind(scenPlotDf, scenFcstList[[k]])
         }
 
         #TODO: Adapt to iteratively include scenario forecasts
  
 
-        scenplot <- ggplot() + geom_line(data = scenPlotDf[scenPlotDf$type == 'actual', c(1, 2)],
-                                       color = 'black', aes(x = Dates, y = value)) +
-            geom_line(data = scenPlotDf[scenPlotDf$type == 'baseline', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dashed')
+        scenplot <- ggplot() + #geom_line(data = scenPlotDf[scenPlotDf$type == 'actual', c(1, 2)],
+                                #       color = 'black', aes(x = dates, y = value)) +
+            geom_line(data = scenPlotDf[scenPlotDf$type == 'Baseline', c(1, 2)], color = 'black', aes(x = dates, y = value), linetype = 'solid')
 
 
         #Add Scenarios to graph
         for (l in 1:length(scenFcstList)) {
-            scenplot <- scenplot + geom_line(data = scenPlotDf[scenPlotDf$type == paste('scenario', l), c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dashed')
+            scenplot <- scenplot + geom_line(data = scenPlotDf[scenPlotDf$type == paste('Scenario', l), c(1, 2)], color = 'black', aes(x = dates, y = value), linetype = 'dashed')
         }
 
         #Make the graph look nice
-        scenplot <- scenplot + geom_point(data = scenPlotDf, aes(x = Dates, y = value, shape = type), size = 1) +
-        scale_x_date(breaks = graphDates) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw() + theme_linedraw()
+        scenplot <- scenplot + geom_point(data = scenPlotDf[scenPlotDf$type != 'actual',], aes(x = dates, y = value, shape = type), size = 2) +
+        scale_x_date(breaks = graphDates) +
+        scale_shape_discrete('') +
+        scale_linetype_manual('', values=c('Baseline'=1, 'Scenario 1'=2, 'Scenario 2'=2)) +     #for now this has to be adjusted manually
+        theme_bw() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
 
         #Write to File
-        jpeg(fname)
-        scenplot
+        jpeg(fname, width = 639, height = 396, units = 'px', quality = 100)
+        print(scenplot)
         dev.off()
 
         
