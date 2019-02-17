@@ -4,7 +4,9 @@ from estimated dVAR models
 " 
 
 #Function Definitions for Utility functions
+
 #create function to simplify creation of appropriate ACF resid plots
+#plot critical values according to original acf() function
 acfplot <- function(var, cmain) {
 
     fname <- paste0(cmain, 'acfplot.jpg')
@@ -37,6 +39,7 @@ acfplot <- function(var, cmain) {
 
 }
 
+#TODO: Test after refactoring
 #Takes the predictions for the variables in var
 preidctionsignificance <- function(vardata, basepred, scenariopred) {
     
@@ -57,6 +60,153 @@ preidctionsignificance <- function(vardata, basepred, scenariopred) {
     return(WstatResult)
 }
 
+#TODO: Test after refactoring
+#Build graphs for comparison of baseline forecast vs actual values
+buildBaseGraphs <- function(data, model, pred, graphStart, graphEnd, predStart) {
+    nrows <- nrow(data)
+    for (i in 1:length(colnames(data))) {
+        varname <- colnames(data)[i]
+
+        fname <- paste0(varnme, 'BasePred.jpeg')
+
+        #startDate <- as.Date("2011/1/1")
+        #endDate <- as.Date("2015/4/1")
+        graphDates <- seq(graphStart, graphEnd, by = "quarter")
+        actual <- data[(nrows - length(dates) + 1):nrows,
+                     varname]
+
+        actualdf <- data.frame(graphDates, actual,
+                       check.rows = TRUE)
+
+        colnames(actualdf) = c('Dates', 'value')
+
+
+        #startDate <- as.Date("2013/7/1")
+        predDates <- seq(predStart, graphEnd, by = "quarter")
+
+        basefcst <- pred$fcst[[varname]][, 1]
+        lower <- pred$fcst[[varname]][, 2]
+        upper <- pred$fcst[[varname]][, 3]
+        #S1fcst <- predS1$fcst[[varname]][, 1]
+        #S2fcst <- predS1$fcst[[varname]][, 1]
+
+        fcstdf <- data.frame(predDates, basefcst, lower, upper, check.rows = TRUE)
+        colnames(fcstdf) = c('Dates', 'value', 'lower', 'upper')
+
+        #Baseline Plot
+        #baseplotdf <- merge(actualdf[actualdf$Dates < min(fcstdf$Dates),], fcstdf[,1:4], by ='Dates', all=TRUE)
+        #baseplotdf$Row.names <- as.Date.factor(baseplotdf$Row.names, format='%Y-%m-%d')
+
+        # baseplot <- ggplot(baseplotdf[baseplotdf$Dates < min(fcstdf$Dates), c('Dates', 'Actual')], aes(x= Dates, y = Actual)) +
+        #   geom_line(color='blue') + geom_smooth(aes(x= Dates, y = 'Forecast - Base', 
+        #                                             ymax = upper, ymin = lower), color = 'red',
+        # data = baseplotdf[baseplotdf$Dates >= min(fcstdf$Dates), c('Dates','Forecast - Base', 'lower','upper')], stat = 'identity') + scale_x_date() + scale_y_continuous()
+        actualdf$id <- 'actual'
+        actualdf$type <- 'actual'
+        # actualdf$lower <- NA
+        # actualdf$upper <- NA
+        basefcstdf <- fcstdf[, c('Dates', 'value' #, 'upper', 'lower'
+                           )]
+        basefcstdf$id <- 'base'
+        basefcstdf$type <- 'basepred'
+
+        #TODO: consider how to make forecast bands look prettier
+        #TODO: also make look of graphs consistent
+
+        upperdf <- fcstdf[, c('Dates', 'upper')]
+        upperdf$id <- 'upper'
+        upperdf$type <- 'predband'
+        colnames(upperdf) <- c('Dates', 'value', 'id', 'type')
+
+        lowerdf <- fcstdf[, c('Dates', 'lower')]
+        lowerdf$id <- 'lower'
+        lowerdf$type <- 'predband'
+        colnames(lowerdf) <- c('Dates', 'value', 'id', 'type')
+
+        baseplotdf <- rbind(actualdf #[actualdf$Dates < min(basefcstdf$Dates),]
+                      , basefcstdf, upperdf, lowerdf)
+
+        #Write to File
+        jpeg(fname)
+
+        baseplot <- ggplot() + geom_line(data = baseplotdf[baseplotdf$id == 'actual', c(1, 2)],
+                                   color = 'black', aes(x = Dates, y = value)) +
+        geom_line(data = baseplotdf[baseplotdf$id == 'base', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dashed') +
+        geom_line(data = baseplotdf[baseplotdf$id == 'upper', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
+        geom_line(data = baseplotdf[baseplotdf$id == 'lower', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
+        geom_point(data = baseplotdf, aes(x = Dates, y = value, shape = type), size = 1) +
+        scale_x_date(breaks = graphDates) +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw() + theme_linedraw()
+
+        dev.off()
+
+    }
+}
+
+#TODO: finish and test
+# Plots baseline (handed over as single pred) and scenarios (handed over as list of preds)
+buildScenarioGraphs <- function(data, model, basePred, predList, graphStart, graphEnd, predStart) {
+    nrows <- nrow(data)
+    for (i in 1:length(colnames(data))) {
+        varname <- colnames(data)[i]
+
+        fname <- paste0(varnme, 'Scenarios.jpeg')
+
+        graphDates <- seq(graphStart, graphEnd, by = "quarter")
+        actual <- data[(nrows - length(dates) + 1):nrows,
+                         varname] #could actually use dates here, but I dislike this due to the data type
+
+        actualdf <- data.frame(graphDates, actual,
+                           check.rows = TRUE)
+        actualdf$type <- 'actual'
+        colnames(actualdf) = c('dates', 'value', 'type')
+
+        predDates <- seq(graphStart, graphEnd, by = "quarter")
+
+        basefcst <- data.frame(predDates, basePred$fcst[[varname]][, 1])
+        basefcst$type <- 'baseline'
+        colnames(basefcst) = c('dates', 'value', 'type')
+
+        #Initialize DF for scenario forecasts
+        scenFcstList <- list()
+
+        for (j in 1:length(predList)) {
+            #Prepare DF for scenario forecast
+            fcstSeries <- data.frame(predDates, predList[[j]]$fcst[[varname]][, 1])
+            fcstSeries$type <- paste('Scenario', j)
+            colnames(fcstSeries) = c('dates', 'value', 'type')
+
+            #Store scenario forecast in list 
+            scenFcstList[[j]] <- fcstSeries
+        }
+
+        #Initialize plot DF with actual and baseline values
+        scenPlotDf <- rbind(actualdf, basefcst)
+
+        #Add scenario forecasts
+        for (k in 1:length(scenFcstList)) {
+            scenPlotDf <- rbind(scenPlotDf, scenFcstList[[k]])
+        }
+
+        #TODO: Adapt to iteratively include scenario forecasts
+
+        #Write to File
+        jpeg(fname)
+
+        scenplot <- ggplot() + geom_line(data = baseplotdf[baseplotdf$id == 'actual', c(1, 2)],
+                                       color = 'black', aes(x = Dates, y = value)) +
+            geom_line(data = baseplotdf[baseplotdf$id == 'base', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dashed') +
+            geom_line(data = baseplotdf[baseplotdf$id == 'upper', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
+            geom_line(data = baseplotdf[baseplotdf$id == 'lower', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
+            geom_point(data = baseplotdf, aes(x = Dates, y = value, shape = type), size = 1) +
+            scale_x_date(breaks = graphDates) +
+            theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw() + theme_linedraw()
+
+        dev.off()
+
+    }
+}
+    
 
 # Bind libraries
 library(vars)  # for basic VAR functionality
@@ -153,75 +303,75 @@ resids <- dVar[['varresult']][[varname]][['residuals']]
 acfplot(resids, varname)
 #Prepare dataframes for plot
 
-##Could easily be extended with sanity checks and be refactored
-nrows <- nrow(EndoVars)
-for (i in 1:length(colnames(EndoVars)))
-{
-  varname <- colnames(EndoVars)[i]
-  startDate <- as.Date("2011/1/1")
-  endDate <- as.Date("2015/4/1")
-  dates <- seq(startDate, endDate, by = "quarter")
-  actual <- EndoVars[(nrows - length(dates) + 1):nrows,
-                     varname]
+###Could easily be extended with sanity checks and be refactored
+#nrows <- nrow(EndoVars)
+#for (i in 1:length(colnames(EndoVars)))
+#{
+  #varname <- colnames(EndoVars)[i]
+  #startDate <- as.Date("2011/1/1")
+  #endDate <- as.Date("2015/4/1")
+  #dates <- seq(startDate, endDate, by = "quarter")
+  #actual <- EndoVars[(nrows - length(dates) + 1):nrows,
+                     #varname]
   
-  actualdf <- data.frame(dates, actual,
-                       check.rows = TRUE)
-  colnames(actualdf) = c('Dates','value')
+  #actualdf <- data.frame(dates, actual,
+                       #check.rows = TRUE)
+  #colnames(actualdf) = c('Dates','value')
   
   
-  startDate <- as.Date("2013/7/1")
-  dates <- seq(startDate, endDate, by = "quarter")
+  #startDate <- as.Date("2013/7/1")
+  #dates <- seq(startDate, endDate, by = "quarter")
   
-  basefcst <- predBase$fcst[[varname]][,1]
-  lower <- predBase$fcst[[varname]][,2]
-  upper <- predBase$fcst[[varname]][,3]
-  S1fcst <- predS1$fcst[[varname]][,1]
-  S2fcst <- predS1$fcst[[varname]][,1]
+  #basefcst <- predBase$fcst[[varname]][,1]
+  #lower <- predBase$fcst[[varname]][,2]
+  #upper <- predBase$fcst[[varname]][,3]
+  #S1fcst <- predS1$fcst[[varname]][,1]
+  #S2fcst <- predS1$fcst[[varname]][,1]
 
-  fcstdf <- data.frame(dates, basefcst, lower, upper, S1fcst,
-                         S2fcst,
-                         check.rows = TRUE)
-  colnames(fcstdf) =  c('Dates','value', 'lower', 'upper',
-      'Forecast - Scenario 1',
-      'Forecast - Scenario 2')
+  #fcstdf <- data.frame(dates, basefcst, lower, upper, S1fcst,
+                         #S2fcst,
+                         #check.rows = TRUE)
+  #colnames(fcstdf) =  c('Dates','value', 'lower', 'upper',
+      #'Forecast - Scenario 1',
+      #'Forecast - Scenario 2')
   
-  #Baseline Plot
-  #baseplotdf <- merge(actualdf[actualdf$Dates < min(fcstdf$Dates),], fcstdf[,1:4], by ='Dates', all=TRUE)
-  #baseplotdf$Row.names <- as.Date.factor(baseplotdf$Row.names, format='%Y-%m-%d')
+  ##Baseline Plot
+  ##baseplotdf <- merge(actualdf[actualdf$Dates < min(fcstdf$Dates),], fcstdf[,1:4], by ='Dates', all=TRUE)
+  ##baseplotdf$Row.names <- as.Date.factor(baseplotdf$Row.names, format='%Y-%m-%d')
   
-  # baseplot <- ggplot(baseplotdf[baseplotdf$Dates < min(fcstdf$Dates), c('Dates', 'Actual')], aes(x= Dates, y = Actual)) +
-  #   geom_line(color='blue') + geom_smooth(aes(x= Dates, y = 'Forecast - Base', 
-  #                                             ymax = upper, ymin = lower), color = 'red',
-  # data = baseplotdf[baseplotdf$Dates >= min(fcstdf$Dates), c('Dates','Forecast - Base', 'lower','upper')], stat = 'identity') + scale_x_date() + scale_y_continuous()
-  actualdf$id <- 'actual'
-  # actualdf$lower <- NA
-  # actualdf$upper <- NA
-  basefcstdf <- fcstdf[, c('Dates', 'value'#, 'upper', 'lower'
-                           )]
-  basefcstdf$id <- 'base'
+  ## baseplot <- ggplot(baseplotdf[baseplotdf$Dates < min(fcstdf$Dates), c('Dates', 'Actual')], aes(x= Dates, y = Actual)) +
+  ##   geom_line(color='blue') + geom_smooth(aes(x= Dates, y = 'Forecast - Base', 
+  ##                                             ymax = upper, ymin = lower), color = 'red',
+  ## data = baseplotdf[baseplotdf$Dates >= min(fcstdf$Dates), c('Dates','Forecast - Base', 'lower','upper')], stat = 'identity') + scale_x_date() + scale_y_continuous()
+  #actualdf$id <- 'actual'
+  ## actualdf$lower <- NA
+  ## actualdf$upper <- NA
+  #basefcstdf <- fcstdf[, c('Dates', 'value'#, 'upper', 'lower'
+                           #)]
+  #basefcstdf$id <- 'base'
   
-  #TODO: consider how to make forecast bands look prettier
-  #TODO: also make look of graphs consistent
+  ##TODO: consider how to make forecast bands look prettier
+  ##TODO: also make look of graphs consistent
   
-  upperdf <- fcstdf[, c('Dates', 'upper')]
-  upperdf$id <- 'upper'
-  colnames(upperdf) <- c('Dates', 'value', 'id') 
+  #upperdf <- fcstdf[, c('Dates', 'upper')]
+  #upperdf$id <- 'upper'
+  #colnames(upperdf) <- c('Dates', 'value', 'id') 
   
-  lowerdf <- fcstdf[, c('Dates', 'lower')]
-  lowerdf$id <- 'lower'
-  colnames(lowerdf) <- c('Dates', 'value', 'id')
+  #lowerdf <- fcstdf[, c('Dates', 'lower')]
+  #lowerdf$id <- 'lower'
+  #colnames(lowerdf) <- c('Dates', 'value', 'id')
   
-  baseplotdf <- rbind(actualdf#[actualdf$Dates < min(basefcstdf$Dates),]
-                      , basefcstdf, upperdf, lowerdf)
-  baseplot <- ggplot() + geom_line(data =  baseplotdf[baseplotdf$id == 'actual', c(1,2)], 
-                                   color = 'black', aes(x = Dates, y = value)) +
-    geom_line(data = baseplotdf[baseplotdf$id == 'base', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dashed') +
-    geom_line(data = baseplotdf[baseplotdf$id == 'upper', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
-    geom_line(data = baseplotdf[baseplotdf$id == 'lower', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
-    scale_x_date(breaks = seq(min(baseplotdf$Dates), max(baseplotdf$Dates), by = 'quarter')) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw() + theme_linedraw()
+  #baseplotdf <- rbind(actualdf#[actualdf$Dates < min(basefcstdf$Dates),]
+                      #, basefcstdf, upperdf, lowerdf)
+  #baseplot <- ggplot() + geom_line(data =  baseplotdf[baseplotdf$id == 'actual', c(1,2)], 
+                                   #color = 'black', aes(x = Dates, y = value)) +
+    #geom_line(data = baseplotdf[baseplotdf$id == 'base', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dashed') +
+    #geom_line(data = baseplotdf[baseplotdf$id == 'upper', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
+    #geom_line(data = baseplotdf[baseplotdf$id == 'lower', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
+    #scale_x_date(breaks = seq(min(baseplotdf$Dates), max(baseplotdf$Dates), by = 'quarter')) +
+    #theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw() + theme_linedraw()
   
-  baseplot
+  #baseplot
 
-   #TODO: export into file
-}
+   ##TODO: export into file
+#}
