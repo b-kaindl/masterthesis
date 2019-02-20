@@ -128,17 +128,12 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         baseplotdf <- rbind(actualdf #[actualdf$Dates < min(basefcstdf$Dates),]
                       , basefcstdf, upperdf, lowerdf)
 
-        baseplot <- ggplot() + geom_line(data = baseplotdf[baseplotdf$id == 'actual', c(1, 2)], color = 'black', aes(x = Dates, y = value)) +
-        geom_line(data = baseplotdf[baseplotdf$id == 'base', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dashed') +
-        geom_line(data = baseplotdf[baseplotdf$id == 'upper', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
-        geom_line(data = baseplotdf[baseplotdf$id == 'lower', c(1, 2)], color = 'black', aes(x = Dates, y = value), linetype = 'dotted') +
-        geom_point(data = baseplotdf, aes(x = Dates, y = value, shape = type), size = 2) +
-        scale_x_date(breaks = graphDates) +
-        #scale_shape_discrete('') +
-        scale_linetype_manual('', values = c('actual' = 1, 'basepred' = 2, 'predband' = 3)) + theme_bw() +
+        baseplot <- ggplot(data = data.frame(baseplotdf), aes(x = Dates, y = value, linetype = type, shape = id)) +
+        geom_line() +  scale_x_date(breaks = graphDates) +
+        theme_bw() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) 
-        
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+        +ggtitle(varname)
         
 
         #Write to File
@@ -150,7 +145,7 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
     }
 }
 
-#TODO: finish and test
+
 # Plots baseline (handed over as single pred) and scenarios (handed over as list of preds)
 buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, graphEnd, predStart) {
     nrows <- nrow(vardata)
@@ -200,31 +195,24 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
             scenPlotDf <- rbind(scenPlotDf, scenFcstList[[k]])
         }
 
-        #TODO: Adapt to iteratively include scenario forecasts
+        
  
-
-        scenplot <- ggplot() + #geom_line(data = scenPlotDf[scenPlotDf$type == 'actual', c(1, 2)],
-                                #       color = 'black', aes(x = dates, y = value)) +
-            geom_line(data = scenPlotDf[scenPlotDf$type == 'Baseline', c(1, 2)], color = 'black', aes(x = dates, y = value), linetype = 'solid')
-
-
-        #Add Scenarios to graph
-        for (l in 1:length(scenFcstList)) {
-            scenplot <- scenplot + geom_line(data = scenPlotDf[scenPlotDf$type == paste('Scenario', l), c(1, 2)], color = 'black', aes(x = dates, y = value), linetype = 'dashed')
-        }
+        
+        scenplot <- ggplot(data = scenPlotDf, aes(x = dates, y = value, shape = type, linetype = type)) +
+            geom_line() + geom_point(size=3)
 
         #Make the graph look nice
-        scenplot <- scenplot + geom_point(data = scenPlotDf[scenPlotDf$type != 'actual',], aes(x = dates, y = value, shape = type), size = 2) +
-        scale_x_date(breaks = graphDates) +
-        scale_shape_discrete('') +
-        scale_linetype_manual('', values=c('Baseline'=1, 'Scenario 1'=2, 'Scenario 2'=2)) +     #for now this has to be adjusted manually
+        scenplot <- scenplot + 
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+        + ggtitle(varname)
 
         #Write to File
         jpeg(fname, width = 639, height = 396, units = 'px', quality = 100)
+
         print(scenplot)
+
         dev.off()
 
         

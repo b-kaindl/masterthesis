@@ -105,6 +105,8 @@ predictStart <- as.Date('2013/07/01')
 buildBaseGraphs(EndoVars, dVar, predBase, axisStart, axisEnd, predictStart)
 
 buildScenarioGraphs(EndoVars, dVar, predBase, predictList, as.Date('2013/04/01'), axisEnd, predictStart)
+
+
 #resids <- dVar[['varresult']][[varname]][['residuals']]
 #acfplot(resids, varname)
 #Prepare dataframes for plot
