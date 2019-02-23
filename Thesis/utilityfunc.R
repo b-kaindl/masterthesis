@@ -4,12 +4,12 @@
 #plot critical values according to original acf() function
 acfplot <- function(var, cmain) {
 
-    fname <- paste0(cmain, 'acfplot.jpg')
+    #fname <- paste0(cmain, 'acfplot.jpg')
 
     a <- acf(var)
 
     #build the plot
-    jpeg(fname)
+    #jpeg(fname)
     plot(a$acf[2:13],
        type = 'h',
        main = cmain,
@@ -30,7 +30,7 @@ acfplot <- function(var, cmain) {
     abline(h = c(
     (critval), - (critval)), lty = c(2, 2))
 
-    dev.off()
+    #dev.off()
 
 }
 
@@ -59,6 +59,8 @@ predictionsignificance <- function(vardata, basepred, scenariopred) {
 #Build graphs for comparison of baseline forecast vs actual values
 buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStart) {
     nrows <- nrow(vardata)
+    plotlist <- list() #prepare list of plots
+
     for (i in 1:length(colnames(vardata))) {
         varname <- colnames(vardata)[i]
         
@@ -135,24 +137,41 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
         +ggtitle(varname)
         
-
-        #Write to File
-        jpeg(fname, width = 639, height = 396, units = 'px', quality = 100)
-        print(baseplot)
-        dev.off()
+        #Store plot in list
+        plotlist[i] <- scenplot
 
 
     }
+
+    fname <- 'basefcst.jpeg'
+
+    nGraphs <- length(plotlist)
+
+    if (nGraphs %% 2 == 0) {
+        plotrows <- nGraphs / 2
+    } else {
+        plotrows <- (nGraphs + 1) / 2 
+    }
+
+    combPlot <- grid_arrange_shared_legend(plotlist, ncol = 2, nrow = plotrows, position = "bottom")
+
+    #Write to File
+    jpeg(fname, quality = 100)
+
+    print(combPlot)
+
+    dev.off()
+
 }
 
 
 # Plots baseline (handed over as single pred) and scenarios (handed over as list of preds)
 buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, graphEnd, predStart) {
     nrows <- nrow(vardata)
+    plotlist <- list() #prepare list of plots
+
     for (i in 1:length(colnames(vardata))) {
         varname <- colnames(vardata)[i]
-
-        fname <- paste0(varname, '_Scenarios.jpeg')
 
         graphDates <- seq(graphStart, graphEnd, by = "quarter")
         actual <- vardata[(nrows - length(graphDates) + 1):nrows,
@@ -208,14 +227,82 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
         + ggtitle(varname)
 
-        #Write to File
-        jpeg(fname, width = 639, height = 396, units = 'px', quality = 100)
+        #Store plot in list
+        plotlist[i] <- scenplot
 
-        print(scenplot)
 
-        dev.off()
+
 
         
 
     }
+
+    fname <- 'scenariofcst.jpeg'
+
+    nGraphs <- length(plotlist)
+
+    if (nGraphs %% 2 == 0) {
+        plotrows <- nGraphs/2
+    } else {
+        plotrows <- (nGraphs + 1) / 2
+    }
+
+    combPlot <- grid_arrange_shared_legend(plotlist, ncol = 2, nrow = plotrows, position = "bottom")
+
+    #Write to File
+    jpeg(fname, quality = 100)
+
+    print(combPlot)
+
+    dev.off()
+}
+
+grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1, position = c("bottom", "right")) {
+    #from https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html
+        plots <- list(...)
+        position <- match.arg(position)
+        g <-
+        ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
+        legend <- g[[which(sapply(g, function(x)
+            x$name) == "guide-box")]]
+        lheight <- sum(legend$height)
+        lwidth <- sum(legend$width)
+        gl <- lapply(plots, function(x)
+            x + theme(legend.position = "none"))
+        gl <- c(gl, ncol = ncol, nrow = nrow)
+
+        combined <- switch(
+      position,
+      "bottom" = arrangeGrob(
+        do.call(arrangeGrob, gl),
+        legend,
+        ncol = 1,
+        heights = unit.c(unit(1, "npc") - lheight, lheight)
+      ),
+      "right" = arrangeGrob(
+        do.call(arrangeGrob, gl),
+        legend,
+        ncol = 2,
+        widths = unit.c(unit(1, "npc") - lwidth, lwidth)
+      )
+    )
+
+        grid.newpage()
+        grid.draw(combined)
+
+        # return gtable invisibly
+        invisible(combined)
+
+}
+
+mod_stargazer <- function(output.file, ...) {
+    #write stargazer output to file
+    #from https://stackoverflow.com/questions/30195718/stargazer-save-to-file-dont-show-in-console
+    output <- capture.output(stargazer(...))
+
+    #to remove environment and caption (want to set those in LaTeX)
+    output <- output[4:length(output)]
+
+    #append = TRUE results in one single file; FALSE results in file for each table
+    cat(paste(output, collapse = "\n"), "\n", file = output.file, append = TRUE)
 }
