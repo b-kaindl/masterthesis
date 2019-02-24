@@ -2,14 +2,12 @@
 
 #create function to simplify creation of appropriate ACF resid plots
 #plot critical values according to original acf() function
-acfplot <- function(var, cmain) {
+acfplot <- function(var, cmain){
 
-    #fname <- paste0(cmain, 'acfplot.jpg')
 
-    a <- acf(var)
+    a <- var
 
     #build the plot
-    #jpeg(fname)
     plot(a$acf[2:13],
        type = 'h',
        main = cmain,
@@ -19,18 +17,18 @@ acfplot <- function(var, cmain) {
        las = 1,
        xaxt = 'n')
 
-    #add some extra features (0 line and conf)
+
     abline(h = 0)
     x <- c(1:12)
     y <- c(1:12)
     axis(1, at = x, labels = y)
 
-    critval <- qnorm(1.95 / 2) / sqrt(length(var))
+    critval <- qnorm(1.95 / 2) / sqrt(a$n.used)
+
     #add approximated 5% critical levels
     abline(h = c(
     (critval), - (critval)), lty = c(2, 2))
 
-    #dev.off()
 
 }
 
@@ -66,7 +64,6 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         i <- i
         varname <- colnames(vardata)[i]
         
-        fname <- paste0(varname, '_BasePred.jpeg')
 
         #startDate <- as.Date("2011/1/1")
         #endDate <- as.Date("2015/4/1")
@@ -102,32 +99,32 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         #                                             ymax = upper, ymin = lower), color = 'red',
         # data = baseplotdf[baseplotdf$Dates >= min(fcstdf$Dates), c('Dates','Forecast - Base', 'lower','upper')], stat = 'identity') + scale_x_date() + scale_y_continuous()
         actualdf$id <- 'actual'
-        actualdf$type <- 'actual'
+        actualdf$type <- 'Actual'
         # actualdf$lower <- NA
         # actualdf$upper <- NA
         basefcstdf <- fcstdf[, c('Dates', 'value' #, 'upper', 'lower'
                            )]
         basefcstdf$id <- 'base'
-        basefcstdf$type <- 'basepred'
+        basefcstdf$type <- 'Baseline'
         basefcstdf[nrow(basefcstdf) + 1,] <-
-            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'base', 'basepred')
+            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'base', 'Baseline')
 
         #TODO: consider how to make forecast bands look prettier
         #TODO: also make look of graphs consistent
 
         upperdf <- fcstdf[, c('Dates', 'upper')]
         upperdf$id <- 'upper'
-        upperdf$type <- 'predband'
+        upperdf$type <- 'Forecast Bands'
         colnames(upperdf) <- c('Dates', 'value', 'id', 'type')
         upperdf[nrow(upperdf) + 1,] <-
-            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'upper', 'predband')
+            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'upper', 'Forecast Bands')
 
         lowerdf <- fcstdf[, c('Dates', 'lower')]
         lowerdf$id <- 'lower'
-        lowerdf$type <- 'predband'
+        lowerdf$type <- 'Forecast Bands'
         colnames(lowerdf) <- c('Dates', 'value', 'id', 'type')
         lowerdf[nrow(lowerdf) + 1,] <-
-            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'lower', 'predband')
+            list(lastNonPredDate, actualdf[actualdf$Dates == lastNonPredDate, 'value'], 'lower', 'Forecast Bands')
 
         baseplotdf <- rbind(actualdf #[actualdf$Dates < min(basefcstdf$Dates),]
                       , basefcstdf, upperdf, lowerdf)
@@ -136,8 +133,9 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         geom_line() +  scale_x_date(breaks = graphDates) +
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-        labs(title = varname)
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+        legend.title = element_blank()) +
+        labs(tag = varname, x = NULL, y = NULL)
         
         #Store plot in list
         plotlist[[i]] <<- baseplot
@@ -145,7 +143,7 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
 
     })
 
-    fname <- 'basefcst.jpeg'
+    fname <- 'basefcst.png'
 
     nGraphs <- length(plotlist)
 
@@ -155,12 +153,25 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         plotrows <- (nGraphs + 1) / 2 
     }
 
-    combPlot <- grid_arrange_shared_legend(plotlist, ncol = 2, nrow = plotrows, position = "bottom")
+    ##Add parameters for do.call()
+    #plotlist[[nGraphs + 1]] <- 2
+    #names(plotlist)[nGraphs + 1] <- 'ncol'
+
+    #plotlist[[nGraphs + 2]] <- plotrows
+    #names(plotlist)[nGraphs + 2] <- 'nrow'
+
+    #plotlist[[nGraphs + 3]] <- 'bottom'
+    #names(plotlist)[nGraphs + 3] <- 'position'
+
+    #combPlot <- do.call(grid_arrange_shared_legend,
+    #                    c(plotlist, list(nrow = plotrows, ncol = 2, position = "bottom")))
+
 
     #Write to File
-    jpeg(fname, quality = 100)
+    png(fname, height = 800, width = 1200)
 
-    print(combPlot)
+    print(do.call(grid_arrange_shared_legend,
+                       c(plotlist, list(nrow = plotrows, ncol = 2, position = "bottom"))))
 
     dev.off()
 
@@ -209,7 +220,7 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
         }
 
         #Initialize plot DF with actual and baseline values
-        scenPlotDf <- rbind(actualdf, basefcst)
+        scenPlotDf <- basefcst
 
         #Add scenario forecasts
         for (k in 1:length(scenFcstList)) {
@@ -221,16 +232,19 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
         
  
         
-        scenplot <- ggplot(data = scenPlotDf, aes(x = dates, y = value, shape = type, linetype = type)) +
-            geom_line() + geom_point(size=3)
+        scenplot <- ggplot(data = scenPlotDf, aes(x = dates, y = value, shape = type,
+        linetype = type)) +
+            geom_line() + geom_point(size = 2) +
+            scale_x_date(breaks = graphDates) 
 
         #Make the graph look nice
         scenplot <- scenplot + 
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-        labs(title = varname)
-
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+        legend.title = element_blank()) +
+        labs(tag = varname, x = NULL, y = NULL)
+      
         #Store plot in list
         plotlist[[i]] <<- scenplot
 
@@ -241,7 +255,7 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
 
     })
 
-    fname <- 'scenariofcst.jpeg'
+    fname <- 'scenariofcst.png'
 
     nGraphs <- length(plotlist)
 
@@ -251,12 +265,26 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
         plotrows <- (nGraphs + 1) / 2
     }
 
-    combPlot <- grid_arrange_shared_legend(plotlist, ncol = 2, nrow = plotrows, position = "bottom")
+    ##Add parameters for do.call()
+    #plotlist[[nGraphs + 1]] <- 2
+    #names(plotlist)[nGraphs + 1] <- 'ncol'
+
+    #plotlist[[nGraphs + 2]] <- plotrows
+    #names(plotlist)[nGraphs + 2] <- 'nrow'
+
+    #plotlist[[nGraphs + 3]] <- 'bottom'
+    #names(plotlist)[nGraphs + 3] <- 'position'
+
+    #combPlot <- do.call(grid_arrange_shared_legend,
+    #                    c(plotlist, list(nrow = plotrows, ncol = 2, position = "bottom")))
+
+    #combPlot <- grid_arrange_shared_legend(plotlist, ncol = 2, nrow = plotrows, position = "bottom")
 
     #Write to File
-    jpeg(fname, quality = 100)
+    png(fname, height = 800, width = 1200)
 
-    print(combPlot)
+    print(do.call(grid_arrange_shared_legend,
+                        c(plotlist, list(nrow = plotrows, ncol = 2, position = "bottom"))))
 
     dev.off()
 }

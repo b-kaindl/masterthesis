@@ -9,6 +9,7 @@ rm(list = ls())
 # Bind libraries and source utility file
 library(vars)  # for basic VAR functionality
 library(ggplot2) # for advanced plotting
+library(grid)
 library(gridExtra) # to construct arranged multiplots
 library(stargazer) # for LaTeX table outputs
 library(broom) # to get tables from statistics
@@ -98,25 +99,32 @@ normtest <- normality.test(dVar)
 mod_stargazer('JBtest.tex', tidy(normtest$jb.mul$JB), title = 'Jarque-Bera Test Statistics for the dVar(3) Model')
 mod_stargazer('kurtosis.tex', tidy(normtest$jb.mul$Kurtosis),
               #tidy(normtest$jb.mul$Skewness),
-              title = 'Kurtosis Test Statistics for Normality for the dVar(3) Model')
+              title = 'Kurtosis Test Statistics for the dVar(3) Model')
 mod_stargazer('skewness.tex', tidy(normtest$jb.mul$Skewness),
-              title = 'Skewness Test Statistics for Normality for the dVar(3) Model')
+              title = 'Skewness Test Statistics for the dVar(3) Model')
 
 
 if (length(colnames(EndoVars)) %% 2 == 0) {
     plotrows <- length(colnames(EndoVars)) / 2
 } else {
-    plotrows <- (length(colnames(EndoVars))+1) / 2
+    plotrows <- ((length(colnames(EndoVars)))+1) / 2
 }
 
-jpeg('acfplot.jpg')
-par(mfrow = c(plotrows,2))
-for (i in 1:length(colnames(EndoVars))) {
-    name <- colnames(EndoVars)[i]
+acftests <- list()
+for (n in 1:length(colnames(EndoVars))) {
+    name <- colnames(EndoVars)[n]
     resids <- dVar[['varresult']][[name]][['residuals']]
-    acfplot(resids, name)
+    acftests[[n]] <- acf(resids)
+}
+
+png('acfplot.png', height = 800, width = 1200)
+par(mfrow = c(plotrows, 2))
+
+for (m in 1:length(colnames(EndoVars))) {
+    acfplot(acftests[[m]], colnames(EndoVars)[m])
 }
 dev.off()
+
 
 #Run Wilcoxon test to check for significant difference between scenarios and BL
 WTestS1 <- predictionsignificance(EndoVars, predBase, predictList[[1]])
