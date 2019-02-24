@@ -6,6 +6,9 @@ from estimated dVAR models
 #clear working space from objects
 rm(list = ls())
 
+#No scientific notation
+options(scipen = 999)
+
 # Bind libraries and source utility file
 library(vars)  # for basic VAR functionality
 library(ggplot2) # for advanced plotting
@@ -79,9 +82,8 @@ dVar <- VAR(EndoVars, p = 3, type = "none", exogen = GSP_Base, ic = "FPE")
 
 #Produce results for variables
 mod_stargazer('VarResults.tex', dVar$varresult$GDP, dVar$varresult$Investment, dVar$varresult$ESR,
-              dVar$varresult$Consumption, dVar$varresult$CPI, align = TRUE, title = 'Regression Results for Dependent Variables in the dVar(3) Model')
-
-test <- 0
+              dVar$varresult$Consumption, dVar$varresult$CPI, align = TRUE, title = 'Regression Results for Dependent Variables in the dVar(3) Model',
+             column.labels = colnames(EndoVars))
 
 predBase <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeB)
 
@@ -96,12 +98,15 @@ predictList[[2]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeS2)
 #Test for Normality (JP, Skew, and Kurtosis)
 normtest <- normality.test(dVar)
 
-mod_stargazer('JBtest.tex', tidy(normtest$jb.mul$JB), title = 'Jarque-Bera Test Statistics for the dVar(3) Model')
-mod_stargazer('kurtosis.tex', tidy(normtest$jb.mul$Kurtosis),
+mod_stargazer('JBtest.tex', data.frame(tidy(normtest$jb.mul$JB)), title = 'Jarque-Bera Test Statistics for the dVar(3) Model', summary = FALSE, rownames = FALSE, digits = 4,
+              dep.var.labels = c('Statistic','p-Value', 'Parameter', 'Method'))
+mod_stargazer('kurtosis.tex', data.frame(tidy(normtest$jb.mul$Kurtosis)),
               #tidy(normtest$jb.mul$Skewness),
-              title = 'Kurtosis Test Statistics for the dVar(3) Model')
-mod_stargazer('skewness.tex', tidy(normtest$jb.mul$Skewness),
-              title = 'Skewness Test Statistics for the dVar(3) Model')
+              title = 'Kurtosis Test Statistics for the dVar(3) Model', summary = FALSE, rownames = FALSE, digits = 4, align = TRUE,
+              dep.var.labels = c('Statistic', 'p-Value', 'Parameter', 'Method'))
+mod_stargazer('skewness.tex', data.frame(tidy(normtest$jb.mul$Skewness)),
+              title = 'Skewness Test Statistics for the dVar(3) Model', summary = FALSE, rownames = FALSE, digits = 4, align = TRUE,
+              dep.var.labels = c('Statistic', 'p-Value', 'Parameter', 'Method'))
 
 
 if (length(colnames(EndoVars)) %% 2 == 0) {
@@ -128,10 +133,10 @@ dev.off()
 
 #Run Wilcoxon test to check for significant difference between scenarios and BL
 WTestS1 <- predictionsignificance(EndoVars, predBase, predictList[[1]])
-WTestS2 <- predictionsignificance(EndoVars, predBase, predictList[[2]])
+#WTestS2 <- predictionsignificance(EndoVars, predBase, predictList[[2]])
 
-mod_stargazer('WTest.tex', WTestS1, title = 'Results of Wilcoxon Signed Ranktest for Scenario 1 vs Baseline')
-mod_stargazer('WTest.tex', WTestS2, title = 'Results of Wilcoxon Signed Ranktest for Scenario 1 vs Baseline')
+mod_stargazer('WTest.tex', WTestS1, title = 'Results of Wilcoxon Signed Ranktest for Scenarios vs Baseline', summary = FALSE)
+#mod_stargazer('WTest.tex', WTestS2, title = 'Results of Wilcoxon Signed Ranktest for Scenario 1 vs Baseline')
 
 
 
