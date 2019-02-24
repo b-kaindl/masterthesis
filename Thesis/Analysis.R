@@ -94,8 +94,13 @@ predictList[[2]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeS2)
 
 #Test for Normality (JP, Skew, and Kurtosis)
 normtest <- normality.test(dVar)
-mod_stargazer('normalitytest.tex', tidy(normtest$jb.mul$JB), tidy(normtest$jb.mul$Kurtosis),
-              tidy(normtest$jb.mul$Skewness), title = 'Test Statistics for Normality for the dVar(3) Model')
+
+mod_stargazer('JBtest.tex', tidy(normtest$jb.mul$JB), title = 'Jarque-Bera Test Statistics for the dVar(3) Model')
+mod_stargazer('kurtosis.tex', tidy(normtest$jb.mul$Kurtosis),
+              #tidy(normtest$jb.mul$Skewness),
+              title = 'Kurtosis Test Statistics for Normality for the dVar(3) Model')
+mod_stargazer('skewness.tex', tidy(normtest$jb.mul$Skewness),
+              title = 'Skewness Test Statistics for Normality for the dVar(3) Model')
 
 
 if (length(colnames(EndoVars)) %% 2 == 0) {
@@ -117,7 +122,8 @@ dev.off()
 WTestS1 <- predictionsignificance(EndoVars, predBase, predictList[[1]])
 WTestS2 <- predictionsignificance(EndoVars, predBase, predictList[[2]])
 
-mod_stargazer('WTest.tex', WTestS1, WTestS2, title = c('Results of Wilcoxon Signed Ranktest for Scenario 1 vs Baseline', 'Results of Wilcoxon Signed Ranktest for Scenario 1 vs Baseline'))
+mod_stargazer('WTest.tex', WTestS1, title = 'Results of Wilcoxon Signed Ranktest for Scenario 1 vs Baseline')
+mod_stargazer('WTest.tex', WTestS2, title = 'Results of Wilcoxon Signed Ranktest for Scenario 1 vs Baseline')
 
 
 

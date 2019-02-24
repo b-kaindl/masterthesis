@@ -44,13 +44,13 @@ predictionsignificance <- function(vardata, basepred, scenariopred) {
     colnames(WstatResult) <- c('Test Statistic', 'p-Value')
     rownames(WstatResult) <- colnames(vardata)
 
-    for (i in 1:length(colnames(vardata))) {
-
+    for (i in 1:length(colnames(vardata))) local({
+        i <- i
         varname <- colnames(vardata)[i]
         test <- wilcox.test(basepred$fcst[[varname]][, 1], scenariopred$fcst[[varname]][, 1], paired = TRUE)
 
-        WstatResult[i,] <- c(test[['statistic']][['V']], round(test[['p.value']], 2))
-    }
+        WstatResult[i,] <<- c(test[['statistic']][['V']], round(test[['p.value']], 2))
+    })
 
     return(WstatResult)
 }
@@ -61,7 +61,9 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
     nrows <- nrow(vardata)
     plotlist <- list() #prepare list of plots
 
-    for (i in 1:length(colnames(vardata))) {
+    for (i in 1:length(colnames(vardata))) local({
+
+        i <- i
         varname <- colnames(vardata)[i]
         
         fname <- paste0(varname, '_BasePred.jpeg')
@@ -134,14 +136,14 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         geom_line() +  scale_x_date(breaks = graphDates) +
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
-        +ggtitle(varname)
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+        labs(title = varname)
         
         #Store plot in list
-        plotlist[i] <- scenplot
+        plotlist[[i]] <<- baseplot
 
 
-    }
+    })
 
     fname <- 'basefcst.jpeg'
 
@@ -170,7 +172,9 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
     nrows <- nrow(vardata)
     plotlist <- list() #prepare list of plots
 
-    for (i in 1:length(colnames(vardata))) {
+    for (i in 1:length(colnames(vardata))) local({
+
+        í <- i
         varname <- colnames(vardata)[i]
 
         graphDates <- seq(graphStart, graphEnd, by = "quarter")
@@ -224,18 +228,18 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
         scenplot <- scenplot + 
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
-        + ggtitle(varname)
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+        labs(title = varname)
 
         #Store plot in list
-        plotlist[i] <- scenplot
+        plotlist[[i]] <<- scenplot
 
 
 
 
         
 
-    }
+    })
 
     fname <- 'scenariofcst.jpeg'
 
