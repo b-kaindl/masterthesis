@@ -15,13 +15,18 @@ acfplot <- function(var, cmain){
        ylab = 'ACF',
        ylim = c(-0.5, 0.5),
        las = 1,
-       xaxt = 'n')
+       xaxt = 'n',
+        cex.lab = 1.5,
+        cex.axis = 1.5,
+        cex.main = 2,
+        cex.sub = 2)
 
 
     abline(h = 0)
     x <- c(1:12)
     y <- c(1:12)
-    axis(1, at = x, labels = y)
+    axis(1, at = x, labels = y, cex.axis = 1.5)
+
 
     critval <- qnorm(1.95 / 2) / sqrt(a$n.used)
 
@@ -130,9 +135,9 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
                       , basefcstdf, upperdf, lowerdf)
 
         baseplot <- ggplot(data = data.frame(baseplotdf), aes(x = Dates, y = value, linetype = type, shape = id)) +
-        geom_line() +  scale_x_date(breaks = graphDates) +
+        geom_line() + scale_x_date(breaks = graphDates) +
         theme_bw() +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
+        theme(text = element_text(size = 15), legend.text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         legend.title = element_blank()) +
         labs(tag = varname, x = NULL, y = NULL)
@@ -238,9 +243,9 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
             scale_x_date(breaks = graphDates) 
 
         #Make the graph look nice
-        scenplot <- scenplot + 
+        scenplot <- scenplot +
         theme_bw() +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
+        theme(text = element_text(size = 15), legend.text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         legend.title = element_blank()) +
         labs(tag = varname, x = NULL, y = NULL)
