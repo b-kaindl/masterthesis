@@ -16,6 +16,7 @@ library(grid)
 library(gridExtra) # to construct arranged multiplots
 library(stargazer) # for LaTeX table outputs
 library(broom) # to get tables from statistics
+library(scales)
 source('utilityfunc.R')
 #library(tsDyn) # for more advanced VAR operations and bootstraps
 
@@ -260,4 +261,25 @@ buildScenarioGraphs(EndoVars, dVar, predBase, predictList, as.Date('2013/04/01')
 #resids <- dVar[['varresult']][[varname]][['residuals']]
 #acfplot(resids, varname)
 #Prepare dataframes for plots
+print(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1])
+print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1]))))
+print(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1])
+print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1]))))
+print(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1])
+print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1]))))
+print(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1])
+print(percent(max(abs(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1]))))
+print(predBase$fcst$CPI[, 1] - predictList[[1]]$fcst$CPI[, 1])
+print(percent(max(abs(predBase$fcst$CPI[, 1] - predictList[[1]]$fcst$CPI[, 1]))))
+
+print(predBase$fcst$GDP[, 1] - predictList[[2]]$fcst$GDP[, 1])
+print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[2]]$fcst$GDP[, 1]))))
+print(predBase$fcst$Investment[, 1] - predictList[[2]]$fcst$Investment[, 1])
+print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[2]]$fcst$Investment[, 1]))))
+print(predBase$fcst$ESR[, 1] - predictList[[2]]$fcst$ESR[, 1])
+print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[2]]$fcst$ESR[, 1]))))
+print(predBase$fcst$Consumption[, 1] - predictList[[2]]$fcst$Consumption[, 1])
+print(percent(max(abs(predBase$fcst$Consumption[, 1] - predictList[[2]]$fcst$Consumption[, 1]))))
+print(predBase$fcst$CPI[, 1] - predictList[[2]]$fcst$CPI[, 1])
+print(percent(max(abs(predBase$fcst$CPI[, 1] - predictList[[2]]$fcst$CPI[, 1]))))
 
