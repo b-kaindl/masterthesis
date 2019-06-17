@@ -128,13 +128,6 @@ GSP_Fore_S1I <- as.data.frame(cbind(GSP_ForeB[, 1] + c(GSP_ForeB[1, 1] * 0.1, 0,
 colnames(GSP_Fore_S1I) <- colnames(GSP_Base)
 
 #Linear Reduction
-#GSP_Fore_S1LR <- as.data.frame(cbind(GSP_ForeB[, 1] + c(GSP_ForeB[1, 1] * 0.1, GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7,
-                               #GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7, GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7,
-                               #GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7, GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7,
-                               #GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7, GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7),
-                #GSP_ForeB[, 2] + c(0, GSP_ForeB[1, 1] * 0.1, GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1 / 7, GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1 / 7,
-                #GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7, GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1/7,
-                #GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1 / 7, GSP_ForeB[1, 1] * 0.1 - GSP_ForeB[1, 1] * 0.1 / 7)))
 
 GSP_Fore_S1LR <- as.data.frame(cbind(c(GSP_ForeB[1, 1] * 1.1, GSP_ForeB[1, 1] * 1.1 - GSP_ForeB[1, 1] * 0.1 / 7,
                                GSP_ForeB[1, 1] * 1.1 - 2*GSP_ForeB[1, 1] * 0.1 / 7, GSP_ForeB[1, 1] * 1.1 - 3*GSP_ForeB[1, 1] * 0.1 / 7,
@@ -166,13 +159,6 @@ GSP_Fore_S2I <- as.data.frame(cbind(GSP_ForeB[, 1] + c(GSP_ForeB[1, 1] * 0.25, 0
 colnames(GSP_Fore_S2I) <- colnames(GSP_Base)
 
 #Spend all GSP at once and then reuduce linearly
-#GSP_Fore_S2LR <- as.data.frame(cbind(GSP_ForeB[, 1] + c(GSP_ForeB[1, 1] * 0.25, GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7,
-                               #GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7, GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7,
-                               #GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7, GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7,
-                               #GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7, GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7),
-                #GSP_ForeB[, 2] + c(0, GSP_ForeB[1, 1] * 0.25, GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25 / 7, GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25 / 7,
-                #GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7, GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7,
-#GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7, GSP_ForeB[1, 1] * 0.25 - GSP_ForeB[1, 1] * 0.25/7)))
 
 GSP_Fore_S2LR <- as.data.frame(cbind(c(GSP_ForeB[1, 1] * 1.25, GSP_ForeB[1, 1] * 1.25 - GSP_ForeB[1, 1] * 0.25 / 7,
                                GSP_ForeB[1, 1] * 1.25 - 2 * GSP_ForeB[1, 1] * 0.25 / 7, GSP_ForeB[1, 1] * 1.25 - 3 * GSP_ForeB[1, 1] * 0.25 / 7,
@@ -194,11 +180,8 @@ mod_stargazer('VarResults.tex', dVar$varresult$GDP, dVar$varresult$Investment, d
 predBase <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeB)
 
 predictList <- list()
-predictList[[1]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeS1)
-predictList[[2]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeS2)
-
-#predS1 <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeS1)
-#predS2 <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeS2)
+predictList[[1]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_Fore_S1LR)
+predictList[[2]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_Fore_S2LR)
 
 
 #Test for Normality (JP, Skew, and Kurtosis)
@@ -239,10 +222,11 @@ dev.off()
 
 #Run Wilcoxon test to check for significant difference between scenarios and BL
 WTestS1 <- predictionsignificance(EndoVars, predBase, predictList[[1]])
+#Arrives at some result as WTestS1
 #WTestS2 <- predictionsignificance(EndoVars, predBase, predictList[[2]])
 
 mod_stargazer('WTest.tex', WTestS1, title = 'Results of Wilcoxon Signed Ranktest for Scenarios vs Baseline', summary = FALSE)
-#mod_stargazer('WTest.tex', WTestS2, title = 'Results of Wilcoxon Signed Ranktest for Scenario 1 vs Baseline')
+
 
 
 
@@ -258,28 +242,25 @@ buildBaseGraphs(EndoVars, dVar, predBase, axisStart, axisEnd, predictStart)
 buildScenarioGraphs(EndoVars, dVar, predBase, predictList, as.Date('2013/04/01'), axisEnd, predictStart)
 
 
-#resids <- dVar[['varresult']][[varname]][['residuals']]
-#acfplot(resids, varname)
-#Prepare dataframes for plots
-print(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1])
-print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1]))))
-print(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1])
-print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1]))))
-print(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1])
-print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1]))))
-print(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1])
-print(percent(max(abs(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1]))))
-print(predBase$fcst$CPI[, 1] - predictList[[1]]$fcst$CPI[, 1])
-print(percent(max(abs(predBase$fcst$CPI[, 1] - predictList[[1]]$fcst$CPI[, 1]))))
+#print(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1])
+#print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1]))))
+#print(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1])
+#print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1]))))
+#print(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1])
+#print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1]))))
+#print(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1])
+#print(percent(max(abs(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1]))))
+#print(predBase$fcst$CPI[, 1] - predictList[[1]]$fcst$CPI[, 1])
+#print(percent(max(abs(predBase$fcst$CPI[, 1] - predictList[[1]]$fcst$CPI[, 1]))))
 
-print(predBase$fcst$GDP[, 1] - predictList[[2]]$fcst$GDP[, 1])
-print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[2]]$fcst$GDP[, 1]))))
-print(predBase$fcst$Investment[, 1] - predictList[[2]]$fcst$Investment[, 1])
-print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[2]]$fcst$Investment[, 1]))))
-print(predBase$fcst$ESR[, 1] - predictList[[2]]$fcst$ESR[, 1])
-print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[2]]$fcst$ESR[, 1]))))
-print(predBase$fcst$Consumption[, 1] - predictList[[2]]$fcst$Consumption[, 1])
-print(percent(max(abs(predBase$fcst$Consumption[, 1] - predictList[[2]]$fcst$Consumption[, 1]))))
-print(predBase$fcst$CPI[, 1] - predictList[[2]]$fcst$CPI[, 1])
-print(percent(max(abs(predBase$fcst$CPI[, 1] - predictList[[2]]$fcst$CPI[, 1]))))
+#print(predBase$fcst$GDP[, 1] - predictList[[2]]$fcst$GDP[, 1])
+#print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[2]]$fcst$GDP[, 1]))))
+#print(predBase$fcst$Investment[, 1] - predictList[[2]]$fcst$Investment[, 1])
+#print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[2]]$fcst$Investment[, 1]))))
+#print(predBase$fcst$ESR[, 1] - predictList[[2]]$fcst$ESR[, 1])
+#print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[2]]$fcst$ESR[, 1]))))
+#print(predBase$fcst$Consumption[, 1] - predictList[[2]]$fcst$Consumption[, 1])
+#print(percent(max(abs(predBase$fcst$Consumption[, 1] - predictList[[2]]$fcst$Consumption[, 1]))))
+#print(predBase$fcst$CPI[, 1] - predictList[[2]]$fcst$CPI[, 1])
+#print(percent(max(abs(predBase$fcst$CPI[, 1] - predictList[[2]]$fcst$CPI[, 1]))))
 

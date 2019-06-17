@@ -37,7 +37,7 @@ acfplot <- function(var, cmain){
 
 }
 
-#TODO: Test after refactoring
+
 #Takes the predictions for the variables in var
 predictionsignificance <- function(vardata, basepred, scenariopred) {
 
@@ -58,7 +58,7 @@ predictionsignificance <- function(vardata, basepred, scenariopred) {
     return(WstatResult)
 }
 
-#TODO: Test after refactoring
+
 #Build graphs for comparison of baseline forecast vs actual values
 buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStart) {
     nrows <- nrow(vardata)
@@ -96,17 +96,8 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         colnames(fcstdf) = c('Dates', 'value', 'lower', 'upper')
 
         #Baseline Plot
-        #baseplotdf <- merge(actualdf[actualdf$Dates < min(fcstdf$Dates),], fcstdf[,1:4], by ='Dates', all=TRUE)
-        #baseplotdf$Row.names <- as.Date.factor(baseplotdf$Row.names, format='%Y-%m-%d')
-
-        # baseplot <- ggplot(baseplotdf[baseplotdf$Dates < min(fcstdf$Dates), c('Dates', 'Actual')], aes(x= Dates, y = Actual)) +
-        #   geom_line(color='blue') + geom_smooth(aes(x= Dates, y = 'Forecast - Base', 
-        #                                             ymax = upper, ymin = lower), color = 'red',
-        # data = baseplotdf[baseplotdf$Dates >= min(fcstdf$Dates), c('Dates','Forecast - Base', 'lower','upper')], stat = 'identity') + scale_x_date() + scale_y_continuous()
         actualdf$id <- 'actual'
         actualdf$type <- 'Actual'
-        # actualdf$lower <- NA
-        # actualdf$upper <- NA
         basefcstdf <- fcstdf[, c('Dates', 'value' #, 'upper', 'lower'
                            )]
         basefcstdf$id <- 'base'
@@ -157,19 +148,6 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
     } else {
         plotrows <- (nGraphs + 1) / 2 
     }
-
-    ##Add parameters for do.call()
-    #plotlist[[nGraphs + 1]] <- 2
-    #names(plotlist)[nGraphs + 1] <- 'ncol'
-
-    #plotlist[[nGraphs + 2]] <- plotrows
-    #names(plotlist)[nGraphs + 2] <- 'nrow'
-
-    #plotlist[[nGraphs + 3]] <- 'bottom'
-    #names(plotlist)[nGraphs + 3] <- 'position'
-
-    #combPlot <- do.call(grid_arrange_shared_legend,
-    #                    c(plotlist, list(nrow = plotrows, ncol = 2, position = "bottom")))
 
 
     #Write to File
@@ -269,21 +247,6 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
     } else {
         plotrows <- (nGraphs + 1) / 2
     }
-
-    ##Add parameters for do.call()
-    #plotlist[[nGraphs + 1]] <- 2
-    #names(plotlist)[nGraphs + 1] <- 'ncol'
-
-    #plotlist[[nGraphs + 2]] <- plotrows
-    #names(plotlist)[nGraphs + 2] <- 'nrow'
-
-    #plotlist[[nGraphs + 3]] <- 'bottom'
-    #names(plotlist)[nGraphs + 3] <- 'position'
-
-    #combPlot <- do.call(grid_arrange_shared_legend,
-    #                    c(plotlist, list(nrow = plotrows, ncol = 2, position = "bottom")))
-
-    #combPlot <- grid_arrange_shared_legend(plotlist, ncol = 2, nrow = plotrows, position = "bottom")
 
     #Write to File
     png(fname, height = 800, width = 1200)
