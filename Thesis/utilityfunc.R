@@ -91,6 +91,11 @@ buildBaseGraphs <- function(vardata, model, pred, graphStart, graphEnd, predStar
         upper <- pred$fcst[[varname]][, 3]
         #S1fcst <- predS1$fcst[[varname]][, 1]
         #S2fcst <- predS1$fcst[[varname]][, 1]
+        # print(varname)
+        # print(dim(predDates))
+        # print(dim(basefcst))
+        # print(dim(lower))
+        # print(nrow(upper))
 
         fcstdf <- data.frame(predDates, basefcst, lower, upper, check.rows = TRUE)
         colnames(fcstdf) = c('Dates', 'value', 'lower', 'upper')
@@ -168,7 +173,7 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
 
     for (i in 1:length(colnames(vardata))) local({
 
-        í <- i
+        i <- i
         varname <- colnames(vardata)[i]
 
         graphDates <- seq(graphStart, graphEnd, by = "quarter")
@@ -208,7 +213,7 @@ buildScenarioGraphs <- function(vardata, model, basePred, predList, graphStart, 
         #Add scenario forecasts
         for (k in 1:length(scenFcstList)) {
             scenFcstList[[k]][nrow(scenFcstList[[k]]) + 1,] <-
-            list(lastNonPredDate, actualdf[actualdf$dates == lastNonPredDate, 'value'], paste('Scenario', j))
+            list(lastNonPredDate, actualdf[actualdf$dates == lastNonPredDate, 'value'], paste('Scenario', k))
             scenPlotDf <- rbind(scenPlotDf, scenFcstList[[k]])
         }
 

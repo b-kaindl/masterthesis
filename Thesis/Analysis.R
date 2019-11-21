@@ -236,16 +236,15 @@ axisEnd <- as.Date('2015/04/01')
 predictStart <- as.Date('2013/07/01')
 
 
-
 buildBaseGraphs(EndoVars, dVar, predBase, axisStart, axisEnd, predictStart)
 
 buildScenarioGraphs(EndoVars, dVar, predBase, predictList, as.Date('2013/04/01'), axisEnd, predictStart)
-
+  
 
 #print(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1])
 #print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1]))))
 #print(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1])
-#print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1]))))
+#print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[1?]]$fcst$Investment[, 1]))))
 #print(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1])
 #print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1]))))
 #print(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1])
