@@ -26,11 +26,6 @@ data <- readRDS('moritadata.rds')
 " Convert the data into time series, take their logs (except inflation and CPI) 
  and combine them into a data frame (correcting for data point lost due to lag)
 "
-#tsESR <- diff(ts(data$`excess stock returns`,
-            #start = c(1980, 1), frequency = 4), lag = 1)
-
-#tsESR <- ts(data$`excess stock returns`,
-            #start = c(1980, 1), frequency = 4)
 
 tsE <- ts(data$`excess stock returns`,
  start = c(1980, 1), frequency = 4)
@@ -59,15 +54,6 @@ tsGSPS2 <- ts(data$`gov. spending`,
 
 
 
-#tsGSPBase <- diff(log(ts(data$`gov. spending`,
-            #start = c(1980, 1), frequency = 4)), lag = 1)
-
-#tsGSPS1 <- diff(log(ts(data$`gov. spending`,
-            #start = c(1980, 1), frequency = 4) * 1.1), lag = 1)
-
-#tsGSPS2 <- diff(log(ts(data$`gov. spending`,
-            #start = c(1980, 1), frequency = 4) * 1.25), lag = 1)
-
 tsCPI <- ts(data$`CPI inflation`,
             start = c(1980, 1), frequency = 4)
 
@@ -91,6 +77,7 @@ tsGSP_Base <- window(tsGSPBase, start = c(1980,2), end = c(2013, 2))
 tsGSP_BaseLag <- lag(window(tsGSPBase, end = c(2013, 1)), -1)
 
 
+#additional lags for testing
 #tsGSP_BaseLag2 <- lag(window(tsGSPBase, end = c(2012, 4)), -2)
 #tsGSP_BaseLag3 <- lag(window(tsGSPBase, end = c(2012, 3)), -3)
 #tsGSP_BaseLag3 <- lag(window(tsGSPBase, end = c(2012, 2)), -4)
@@ -101,6 +88,8 @@ colnames(GSP_Base) <- c('GSP', 'Lag'#, 'Lag2', 'Lag3', 'Lag4'
 )
 
 GSP_ForeBLag <- lag(window(tsGSPBase, c(2013, 2), c(2015, 1)), -1)
+
+#additional lags for testing
 #GSP_ForeBLag2 <- lag(window(tsGSPBase, c(2013, 1), c(2014, 4)), -2)
 #GSP_ForeBLag3 <- lag(window(tsGSPBase, c(2012, 4), c(2014, 3)), -3)
 #GSP_ForeBLag4 <- lag(window(tsGSPBase, c(2012, 3), c(2014, 2)), -4)
@@ -111,6 +100,8 @@ colnames(GSP_ForeB) <- colnames(GSP_Base)
 
 
 GSP_ForeS1Lag <- lag(window(tsGSPS1, c(2013, 2), c(2015, 1)), -1)
+
+#additional lags for testing
 #GSP_ForeS1Lag2 <- lag(window(tsGSPS1, c(2013, 1), c(2014, 4)), -2)
 #GSP_ForeS1Lag3 <- lag(window(tsGSPS1, c(2012, 4), c(2014, 3)), -3)
 #GSP_ForeS1Lag4 <- lag(window(tsGSPS1, c(2012, 3), c(2014, 2)), -4)
@@ -141,6 +132,8 @@ GSP_Fore_S1LR <- as.data.frame(cbind(c(GSP_ForeB[1, 1] * 1.1, GSP_ForeB[1, 1] * 
 colnames(GSP_Fore_S1LR) <- colnames(GSP_Base)
 
 GSP_ForeS2Lag <- lag(window(tsGSPS2, c(2013, 2), c(2015, 1)), -1)
+
+#additional lags for testing
 #GSP_ForeS2Lag2 <- lag(window(tsGSPS2, c(2013, 1), c(2014, 4)), -2)
 #GSP_ForeS2Lag3 <- lag(window(tsGSPS2, c(2012, 4), c(2014, 3)), -3)
 #GSP_ForeS2Lag4 <- lag(window(tsGSPS2, c(2012, 3), c(2014, 2)), -4)
@@ -180,8 +173,8 @@ mod_stargazer('VarResults.tex', dVar$varresult$GDP, dVar$varresult$Investment, d
 predBase <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_ForeB)
 
 predictList <- list()
-predictList[[1]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_Fore_S1LR)
-predictList[[2]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_Fore_S2LR)
+predictList[[1]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_Fore_S1LR) #Choose scenario 1
+predictList[[2]] <- predict(dVar, n.ahead = 8, ci = 0.95, dumvar = GSP_Fore_S2LR) #Choose scenario 2
 
 
 #Test for Normality (JP, Skew, and Kurtosis)
@@ -225,7 +218,7 @@ WTestS1 <- predictionsignificance(EndoVars, predBase, predictList[[1]])
 #Arrives at some result as WTestS1
 #WTestS2 <- predictionsignificance(EndoVars, predBase, predictList[[2]])
 
-mod_stargazer('WTest.tex', WTestS1, title = 'Results of Wilcoxon Signed Ranktest for Scenarios vs Baseline', summary = FALSE)
+mod_stargazer('WTest.tex', WTestS1, title = 'Results of Wilcoxon signed-rank test for Scenarios vs. Baseline', summary = FALSE)
 
 
 
@@ -241,25 +234,4 @@ buildBaseGraphs(EndoVars, dVar, predBase, axisStart, axisEnd, predictStart)
 buildScenarioGraphs(EndoVars, dVar, predBase, predictList, as.Date('2013/04/01'), axisEnd, predictStart)
   
 
-#print(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1])
-#print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[1]]$fcst$GDP[, 1]))))
-#print(predBase$fcst$Investment[, 1] - predictList[[1]]$fcst$Investment[, 1])
-#print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[1?]]$fcst$Investment[, 1]))))
-#print(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1])
-#print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[1]]$fcst$ESR[, 1]))))
-#print(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1])
-#print(percent(max(abs(predBase$fcst$Consumption[, 1] - predictList[[1]]$fcst$Consumption[, 1]))))
-#print(predBase$fcst$CPI[, 1] - predictList[[1]]$fcst$CPI[, 1])
-#print(percent(max(abs(predBase$fcst$CPI[, 1] - predictList[[1]]$fcst$CPI[, 1]))))
-
-#print(predBase$fcst$GDP[, 1] - predictList[[2]]$fcst$GDP[, 1])
-#print(percent(max(abs(predBase$fcst$GDP[, 1] - predictList[[2]]$fcst$GDP[, 1]))))
-#print(predBase$fcst$Investment[, 1] - predictList[[2]]$fcst$Investment[, 1])
-#print(percent(max(abs(predBase$fcst$Investment[, 1] - predictList[[2]]$fcst$Investment[, 1]))))
-#print(predBase$fcst$ESR[, 1] - predictList[[2]]$fcst$ESR[, 1])
-#print(percent(max(abs(predBase$fcst$ESR[, 1] - predictList[[2]]$fcst$ESR[, 1]))))
-#print(predBase$fcst$Consumption[, 1] - predictList[[2]]$fcst$Consumption[, 1])
-#print(percent(max(abs(predBase$fcst$Consumption[, 1] - predictList[[2]]$fcst$Consumption[, 1]))))
-#print(predBase$fcst$CPI[, 1] - predictList[[2]]$fcst$CPI[, 1])
-#print(percent(max(abs(predBase$fcst$CPI[, 1] - predictList[[2]]$fcst$CPI[, 1]))))
 

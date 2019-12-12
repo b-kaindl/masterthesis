@@ -1,0 +1,211 @@
+% das Dokumentenformat
+\documentclass[a4paper, 11pt, twopages]{article}
+
+%\usepackage[english, ngerman]{babel}  % <-- f�r deutsche arbeit
+
+% wegen deutschen Umlauten - Details: http://www.golatex.de/usepackagelatin1inputenc-vs-usepackaget1fontenc-t7624.html
+\usepackage[T1]{fontenc}
+%\usepackage[ansinew]{inputenc} % auf Zeichencodierung der Datei achten! In TeXnicCenter im "Speichern Unter"-Dialog 'ANSI' ausw�hlen.
+\usepackage[utf8]{inputenc} % alternative Zeichencodierung 'UTF-8'
+
+%% IMAGE PACKAGE
+\usepackage{graphicx}
+
+%% PACKAGE FOR THE BACKGROUNDPIC
+\usepackage{eso-pic}
+
+%% PACKAGE FOR THE HEADERS AND FOOTERS
+%\usepackage{fancyhdr}
+
+%% PACKAGE TO INCLUDE A PDF FILE
+\usepackage{pdfpages}
+
+\usepackage{amsmath}%
+\usepackage{amsfonts}%
+\usepackage{amssymb}%
+\usepackage{longtable}
+\usepackage{graphicx}
+%\usepackage{showframe}
+\usepackage{lscape}
+\usepackage{tabularx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{dcolumn}
+\usepackage{CJKutf8}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\usepackage{siunitx}
+\usepackage{natbib}
+\usepackage{listings}
+\usepackage{har2nat}
+%\usepackage{adjustbox}
+\usepackage[nottoc]{tocbibind}
+\usepackage{hyperref}
+\usepackage[toc,page]{appendix}
+\usepackage{xcolor}
+%\usepackage{color}
+\usepackage[usenames,dvipsnames]{color}    
+
+\lstset{ 
+  language=R,                     % the language of the code
+  basicstyle=\tiny\ttfamily, % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{Blue},  % the style that is used for the line-numbers
+  stepnumber=1,                   % the step between two line-numbers. If it is 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  keywordstyle=\color{RoyalBlue},      % keyword style
+  commentstyle=\color{YellowGreen},   % comment style
+  stringstyle=\color{ForestGreen}      % string literal style
+} 
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+\setlength{\bibsep}{0.0pt}
+
+
+
+\setlength{\parindent}{4em}
+\setlength{\parskip}{1em}
+\renewcommand{\baselinestretch}{1.5}
+
+\newcommand\BackgroundPic{%
+\put(0,0){%
+\parbox[b][\paperheight]{\paperwidth}{%
+\vfill
+\centering
+\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{background.pdf}%
+\vfill
+}}}
+%\fancyhf{}% Clear all headers/footers
+%\renewcommand{\headrulewidth}{0pt}% No header rule
+%\renewcommand{\footrulewidth}{0pt}% No footer rule
+%\fancyfoot[L]{\hspace*{-16mm}\includegraphics[scale=0.3]{logoDepartment.pdf}}
+
+%Name Bibliography to References
+\renewcommand{\bibname}{References}
+
+\begin{document}
+%\hyphenpenalty = 10000
+%\exhyphenpenalty = 10000
+\widowpenalty10000
+\clubpenalty10000
+
+\includepdf[pages={1}]{scan-of-declaration-of-authorship.pdf}
+\pagebreak
+
+\AddToShipoutPicture*{\BackgroundPic}
+%\thispagestyle{fancy}
+
+
+{\vspace{2cm}~}
+{\vspace{2cm}}
+
+%% SELECT BACHELOR OR MASTER THESIS
+{\noindent\large Master Thesis}
+
+
+\vspace{1cm}
+
+%% WRITE THE TITLE OF YOUR WORK
+{\noindent\huge\textbf{The Potential Effects of Government Expenditure on Macroeconomic Dynamics:
+\newline A Policy Counterfactual Approach}}
+
+
+
+\bigskip
+
+%% WRITE YOUR NAME, date of birth, Student ID
+{\noindent\LARGE Bernhard Kaindl}
+
+%% WRITE YOUR date of birth, Student ID
+\bigskip
+{\noindent\small Date of Birth: 29.04.1993}\newline
+{\noindent\small Student ID: 1151254}
+
+\bigskip
+{\vspace{2cm}}
+{\noindent\large {\bf Subject Area:} Economics}
+
+%% WRITE YOUR Studienkennzahl
+\bigskip
+%{\noindent\large {\bf Studienkennzahl:} J123456789}
+
+
+
+%% WRITE THE NAME OF YOUR SUPERVISOR
+{\noindent\large {\bf Supervisor:} Jes\'{u}s Crespo Cuaresma}
+
+\bigskip
+
+%% WRITE THE DATAE OF SUBMISSION
+{\noindent\large {\bf Date of Submission:} }
+
+\bigskip\bigskip\bigskip\bigskip\bigskip
+
+{\em\noindent Department of Economics, Vienna University of
+Economics and Business, Welthandelsplatz 1, 1020 Vienna, Austria
+}
+
+
+\pagestyle{empty}
+\pagebreak
+\tableofcontents
+\pagebreak
+\listoffigures
+\pagebreak
+\listoftables
+\pagebreak
+
+
+\begin{abstract}
+This study aims to evaluate the impact of an exogenous government increase by policymakers on macroeconomic growth paths. For this, we construct counterfactual forecasts from a VAR model in a similar fashion as \citet{kapetanios2012}. For this purpose, we use data from \citet{morita2017} on the Japanese economy between 1980 and 2015. The forecasts imply that exogenous government expenditure affects growth paths depends on \emph{how} it is increased, whereas the effects seem to be rather insensitive to scale increases. The effects observed were also rather small compared to the cost of the policy measures. The advantage of the approach used in this study is that we try to impose as little structure as possible and arrive at an easily extensible model that can be used as a starting point for further investigation of relationships or as a tool for policy evaluation, when forecast reliability is more important than exploring relationships between the variables. 
+\end{abstract}
+
+\pagebreak
+%\pagenumbering{arabic}
+\pagestyle{plain}
+
+
+	
+\input{intro.tex}
+
+%\input{JBTest.tex}
+%\input{kurtosis.tex}
+%\input{skewness.tex}
+%\input{VarResults.tex}
+%\input{WTest.tex}
+
+\input{litrev.tex}
+\input{method.tex}
+\input{results.tex}
+\input{discandconcl.tex}
+
+
+%adopt style
+\bibliographystyle{dcu}
+\bibliography{Sources}
+
+\pagebreak
+\appendix
+\section{Source Code for Analysis}
+The following listings can be found on \href{https://github.com/kaiharuto/masterthesis}{GitHub} 
+
+
+\lstinputlisting[breaklines=true, language=R, caption=Analysis.R, frame = single]{Analysis.R}
+\lstinputlisting[breaklines=true, language=R, caption=utilityfunc.R, frame = single]{utilityfunc.R}
+
+\end{document}
